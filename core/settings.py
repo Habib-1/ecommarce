@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     
 
-    'accounts',
+    'accounts.apps.AccountConfig',
     'catalog',
     'cart',
     'order',
@@ -167,21 +167,29 @@ REST_AUTH = {
 
 SITE_ID = 1
 
+# authentication config for dj-rest-auth + allauth
+ACCOUNT_LOGIN_METHODS = {"email"}       
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none' 
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_UNIQUE_EMAIL = True
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-
-# ACCOUNT_SIGNUP_PHONE_REQUIRED = False
-# ACCOUNT_SIGNUP_PHONE_VERIFICATION_ENABLED = False
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 
+# email in console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# for production
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "your_email@gmail.com"
+# EMAIL_HOST_PASSWORD = "your_password"
+# DEFAULT_FROM_EMAIL = "your_email@gmail.com"
 
-#for avoid username field and set name and phone// setup serializer
-# ACCOUNT_ADAPTER = "accounts.adapter.CustomAccountAdapter"
-
+# for email verification at register
+EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/email/confirm/"
+PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/password-reset/confirm/"
