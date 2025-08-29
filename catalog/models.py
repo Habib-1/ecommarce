@@ -1,3 +1,4 @@
+from django.utils.text import slugify
 from django.db import models
 from common.models import BaseModel
 from django.core.validators import MinValueValidator
@@ -24,11 +25,14 @@ class Category(BaseModel):
 
 class Brand(BaseModel):
     name=models.CharField(max_length=150)
+    slug=models.SlugField(max_length=200,unique=True,null=False,blank=False,)
     description=models.TextField(blank=True,null=True)
     logo=models.ImageField(upload_to="brands/",null=True,blank=True)
 
+
     class Meta:
         ordering = ["name"]
+ 
 
     def __str__(self):
         return self.name
