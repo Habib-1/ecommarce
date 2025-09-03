@@ -11,7 +11,7 @@ def stock_update(product,change_type,quantity,note='', flag=True):
         elif change_type == 'sale' :
             if product.stock < quantity :
                 raise ValueError("Not enough stock available for sale")
-            product.stock -=quantity
+            product.stock -= quantity
 
         elif change_type=='manual_adjustment' :
             product.stock += quantity
