@@ -14,7 +14,7 @@ def stock_update(product,change_type,quantity,note='', flag=True):
             product.stock -= quantity
 
         elif change_type=='manual_adjustment' :
-            product.stock += quantity
+            product.stock = quantity
 
         else :
             raise ValueError(f"Invalid change_type: {change_type}")
