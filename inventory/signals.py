@@ -7,7 +7,7 @@ from .models import StockLog
 def create_stockLog(sender,instance,created,**kwargs):
     if created:
         stock_update(
-            product=instance.product,
+            product_id=instance.product.id,
             change_type=instance.change_type,
             quantity=instance.quantity,
             note=instance.note,

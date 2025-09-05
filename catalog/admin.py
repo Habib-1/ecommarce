@@ -9,6 +9,7 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Category,CategoryAdmin)
 class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields={"slug":("name",)}
+    search_fields = ('name', 'sku')
 
 admin.site.register(Product,ProductAdmin)
 class BrandAdmin(admin.ModelAdmin):
