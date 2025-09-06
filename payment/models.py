@@ -5,9 +5,8 @@ from order.models import Order
 class Payment(models.Model):
     METHODS = [
         ("cash_on_delivery", "Cash on Delivery"),
-        ("stripe", "Stripe"),
         ("sslcommerz", "SSLCommerz"),
-        ("paypal", "PayPal"),
+        
     ]
     STATUS_CHOICES = [
         ("pending", "Pending"),
