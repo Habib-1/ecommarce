@@ -33,3 +33,4 @@ def stock_update(product_id,change_type,quantity,note='', flag=True):
                 note=note,
                 )
         return product.stock
+    

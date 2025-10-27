@@ -49,7 +49,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(customer__user=self.request.user).prefetch_related("items", "items__product")
+        return Order.objects.filter(customer__user=self.request.user).prefetch_related("items", "items__product__images")
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
     def create(self, request, *args, **kwargs):
         try:

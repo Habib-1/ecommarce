@@ -4,6 +4,12 @@ from django.http import HttpResponseRedirect
 from rest_framework import generics,permissions
 from .models import Customer
 from .serializers import CustomerSerializer
+from dj_rest_auth.registration.views import RegisterView
+from .serializers import CustomRegisterSerializer
+
+class CustomRegisterView(RegisterView):
+    serializer_class = CustomRegisterSerializer
+    
 def email_confirm_redirect(request, key):
     return HttpResponseRedirect(f"{settings.EMAIL_CONFIRM_REDIRECT_BASE_URL}{key}/")
 

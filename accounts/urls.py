@@ -4,7 +4,7 @@ from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
     RegisterView
 )
-from .views import email_confirm_redirect,password_reset_confirm_redirect,CustomerView
+from .views import email_confirm_redirect,password_reset_confirm_redirect,CustomerView,CustomRegisterView
 
 from dj_rest_auth.views import ( 
     LoginView,LogoutView,UserDetailsView,
@@ -12,7 +12,7 @@ from dj_rest_auth.views import (
     PasswordResetConfirmView,
     )
 urlpatterns = [
-    path('register/',RegisterView.as_view(),name='register'),
+    path('register/',CustomRegisterView.as_view(),name='register'),
     path("register/verify-email/", VerifyEmailView.as_view(), name="verify_email"),
     path("register/resend-email/", ResendEmailVerificationView.as_view(), name="resend_email"),
     path("account-confirm-email/<str:key>/", email_confirm_redirect, name="account_confirm_email"),

@@ -4,8 +4,47 @@ from rest_framework import serializers
 from .models import Customer,User
 
 class CustomRegisterSerializer(RegisterSerializer):
-    username = None 
-    email = serializers.EmailField(required=True)
+    username = None  # we use email as username
+    name = serializers.CharField(required=True)
+    phone = serializers.CharField(required=True)
+    
+    # Customer fields
+    address = serializers.CharField(required=False, allow_blank=True)
+    city = serializers.CharField(required=False, allow_blank=True)
+    state = serializers.CharField(required=False, allow_blank=True)
+    postal_code = serializers.CharField(required=False, allow_blank=True)
+    country = serializers.CharField(required=False, default="Bangladesh")
+
+    def get_cleaned_data(self):
+        data = super().get_cleaned_data()
+        data.update({
+            "name": self.validated_data.get("name", ""),
+            "phone": self.validated_data.get("phone", ""),
+            "address": self.validated_data.get("address", ""),
+            "city": self.validated_data.get("city", ""),
+            "state": self.validated_data.get("state", ""),
+            "postal_code": self.validated_data.get("postal_code", ""),
+            "country": self.validated_data.get("country", "Bangladesh"),
+        })
+        return data
+
+    def save(self, request):
+        # 1. Save the User
+        user = super().save(request)
+        user.name = self.cleaned_data.get("name")
+        user.phone = self.cleaned_data.get("phone")
+        user.save()
+
+        # 2. Create Customer with extra fields
+        Customer.objects.create(
+            user=user,
+            address=self.cleaned_data.get("address"),
+            city=self.cleaned_data.get("city"),
+            state=self.cleaned_data.get("state"),
+            postal_code=self.cleaned_data.get("postal_code"),
+            country=self.cleaned_data.get("country"),
+        )
+        return user
 
 class CustomLoginSerializer(LoginSerializer):
     username = None  
@@ -19,7 +58,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'name', 'phone', 'address','city','postal_code','country']
+        fields = ['id', 'name', 'phone', 'address','city','state','postal_code','country']
        
 
     def update(self, instance, validated_data):

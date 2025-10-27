@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import BaseModel
 from accounts.models import Customer
-from catalog.models import Product
+from catalog.models import Product,Variant
 # Create your models here.
 
 class ShippingAddress(BaseModel):
@@ -40,11 +40,22 @@ class Order(BaseModel):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="unpaid")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, related_name="orders")
-
+    shipping_charge = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0 
+        )
+    def __str__(self):
+        if self.customer and self.customer.user:
+            return f"Order #{self.id} - {self.customer.user.email}"
+        return f"Order #{self.id}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
+    size = models.CharField(max_length=50, blank=True, null=True) 
+    color = models.CharField(max_length=50, blank=True, null=True)
+    # variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 

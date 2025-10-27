@@ -1,9 +1,8 @@
-
 from django.db import transaction
 from django.db.models import F, Sum, DecimalField
-from .models import Order, OrderItem
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Order, OrderItem, ShippingAddress, Variant
 from cart.models import Cart
-from .models import ShippingAddress
 
 def create_order_from_cart(customer):
     with transaction.atomic():
@@ -30,25 +29,70 @@ def create_order_from_cart(customer):
             )["total"]
         )
 
+        shipping_charge = 60 if shipping_address.city.strip().lower() == "dhaka" else 120
+
         # Create Order
         order = Order.objects.create(
             customer=customer,
-            total_amount=total_amount,
+            total_amount=total_amount + shipping_charge,
             shipping_address=shipping_address,
+            shipping_charge=shipping_charge,
             order_status="pending",
             payment_status="unpaid",
         )
 
-        # Create OrderItems efficiently
-        order_items = [
-            OrderItem(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price,
+        # Prepare OrderItems and update stock
+        order_items = []
+        for item in cart.items.all():
+            product = item.product
+            color = item.color
+            size = item.size
+            quantity = item.quantity
+
+            try:
+                # যদি variant থাকে
+                variant = Variant.objects.get(
+                    product=product,
+                    color__name__iexact=color,
+                    size__name__iexact=size
+                )
+
+                if variant.stock < quantity:
+                    raise ValueError(f"Not enough stock for variant: {variant}")
+
+                variant.stock -= quantity
+                variant.save(update_fields=["stock"])
+
+                if product.stock < quantity:
+                    raise ValueError(f"Not enough stock for product: {product.name}")
+
+                product.stock -= quantity
+                product.save(update_fields=["stock"])
+
+            except ObjectDoesNotExist:
+                # ❌ যদি variant না থাকে → শুধু product.stock update হবে
+                if product.stock < quantity:
+                    raise ValueError(f"Not enough stock for product: {product.name}")
+
+                product.stock -= quantity
+                product.save(update_fields=["stock"])
+
+            # ✅ Order Item তৈরি
+            order_items.append(
+                OrderItem(
+                    order=order,
+                    product=product,
+                    color=color,
+                    size=size,
+                    quantity=quantity,
+                    price=product.price,  # এটা শুধু reference এর জন্য
+                )
             )
-            for item in cart.items.all()
-        ]
+
         OrderItem.objects.bulk_create(order_items)
+
+        # Deactivate cart
+        cart.is_active = False
+        cart.save(update_fields=["is_active"])
 
         return order

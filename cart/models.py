@@ -14,24 +14,19 @@ class Cart(BaseModel):
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
+    size = models.CharField(max_length=50, blank=True, null=True) 
+    color = models.CharField(max_length=50, blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['cart', 'product'], name='unique_cart_product')
+            models.UniqueConstraint(fields=['cart', 'product', 'size', 'color'], name='unique_cart_product_variant')
         ]
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
 
-   
-    
-
-
-
-
-    
 
 class Wishlist(BaseModel):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="wishlists")

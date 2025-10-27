@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category,Product,Brand,Product_Image
+from .models import Category,Product,Brand,Product_Image,Slider,Variant,Size,Color
 
 #============> Customer APIs Serializers <==========#
 class CategorySerializer(serializers.ModelSerializer):
@@ -31,14 +31,33 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = Product_Image
         fields = ["is_primary", "image"]
 
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ['id', 'name','hex_code']
+
+class SizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
+        fields = ['id', 'name']
+
+class VariantSerializer(serializers.ModelSerializer):
+    color = ColorSerializer(read_only=True)
+    size = SizeSerializer(read_only=True)
+    class Meta:
+        model = Variant
+        fields = ['id', 'color', 'size', 'price', 'stock','color','size',]
+
 
 class ProductSerializer(serializers.ModelSerializer):
     category=serializers.SerializerMethodField()
+    category_slug = serializers.CharField(source='category.slug', read_only=True)
     brand=serializers.SerializerMethodField()
     images = ProductImageSerializer(many=True, read_only=True)
+    variants = VariantSerializer(many=True, read_only=True)
     class Meta:
         model=Product
-        fields=['name','slug','description','price','discount_price','stock','category','brand','sku','images']
+        fields=['id','name','slug','description','price','discount_price','stock','category','category_slug','brand','sku','images','variants']
 
     def get_category(self,obj):
         if obj.category:
@@ -49,3 +68,12 @@ class ProductSerializer(serializers.ModelSerializer):
         if obj.brand:
             return obj.brand.name
         return None
+
+
+
+
+class SliderSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+    class Meta:
+        model = Slider
+        fields = ['id', 'image', 'alt', 'is_active']
